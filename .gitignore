@@ -1,0 +1,19 @@
+# virtual env
+.venv/
+
+# python cache
+__pycache__/
+*.pyc
+
+# env - token
+.env
+
+# vscode
+.vscode/
+
+# logs
+*.log
+
+# system
+.DS_Store
+Thumbs.db
