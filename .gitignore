@@ -1,19 +1,19 @@
-# virtual env
+# Virtual Environment
 .venv/
 
-# python cache
+# Environment Variables >>> BOT_TOKEN
+.env
+
 __pycache__/
 *.pyc
 
-# env - token
-.env
+database/bot.db
 
-# vscode
+*.log
+bot.log
+
 .vscode/
 
-# logs
-*.log
-
-# system
+# OS Files
 .DS_Store
 Thumbs.db

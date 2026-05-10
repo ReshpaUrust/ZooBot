@@ -1,51 +1,61 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    CallbackQueryHandler,
-    ContextTypes,
-)
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters 
+from config import BOT_TOKEN 
+from handlers.start import start 
+from handlers.quiz import button, start_quiz_from_message 
+from handlers.messages import unknown_message 
+from database.db import init_db 
+from handlers.help import help_message 
+from handlers.contacts import contact_message
+from utils.logger import setup_logger
 
-TOKEN = "8794730092:AAHvRiF9bChYj02pZ8DWpwuUuTH1cQSwi8c"
+logger = setup_logger()
 
+def main():
+    init_db()
 
-# Команда /start
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    app = Application.builder().token(BOT_TOKEN).build()
 
-    keyboard = [
-        [InlineKeyboardButton("🚀 Начать викторину", callback_data="start_quiz")]
-    ]
+    # commands
+    app.add_handler(CommandHandler("start", start))
 
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    # inline buttons
+    app.add_handler(CallbackQueryHandler(button))
 
-    await update.message.reply_text(
-        "Привет 👋\n\nДобро пожаловать в викторину про животных!",
-        reply_markup=reply_markup
+    # reply keyboard
+    app.add_handler(
+        MessageHandler(
+            filters.Regex("^🎮 Начать викторину$"),
+            start_quiz_from_message
+        )
     )
 
-
-# Обработка нажатия кнопки
-async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    query = update.callback_query
-
-    await query.answer()
-
-    if query.data == "start_quiz":
-        await query.message.reply_text(
-            "🔥 Викторина началась!\n\n"
-            "Вопрос 1:\n"
-            "Какое животное самое быстрое?"
+    app.add_handler(
+        MessageHandler(
+            filters.Regex("^ℹ️ Помощь$"),
+            help_message
         )
+    )
 
+    app.add_handler(
+        MessageHandler(
+            filters.Regex("^💬 Контакты$"),
+            contact_message
+        )
+    )
 
-# Создание приложения
-app = Application.builder().token(TOKEN).build()
+    # fallback
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT,
+            unknown_message
+        )
+    )
 
-# handlers
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CallbackQueryHandler(button))
+    print("Бот запущен...")
 
-# запуск
-print("Бот запущен...")
-app.run_polling()
+    logger.info("Бот запущен")
+    
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()
